@@ -36,53 +36,66 @@ namespace Updater
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             string[] args = Environment.GetCommandLineArgs();
-
             List<Download> arguments = new List<Download>();
 
-            // Get file download info from command line args.
-            for (int i = 1; i < args.Length; i += 2)
+            if (args.Length < 4)
             {
-                arguments.Add(new Download {url = args[i], file = args[i+1]});
-
-                if (File.Exists(args[i + 1]))
-                {
-                    try
-                    {
-                        File.Delete(args[i + 1]);
-                    }
-                    catch
-                    {
-
-                    }
-                }  
+                MessageBox.Show("No arguments found. Please run the updater with command line arguments.");
+                Environment.Exit(1);
             }
 
-            Update(arguments);
+            string executable = args[1];
+
+            // Get file download info from command line args.
+            for (int i = 2; i < args.Length; i += 2)
+            {
+                // If a new version of the updater is being acquired, rename it to be handled in UpdateCheck.cs
+                if (args[i + 1] == "Updater.exe")
+                {
+                    arguments.Add(new Download { url = args[i], file = "Updater_new.exe" });
+                }
+                else
+                { 
+                    arguments.Add(new Download { url = args[i], file = args[i + 1] });
+                }
+            }
+            
+            if (arguments.Count == 0)
+            {
+                MessageBox.Show("No arguments found. Please run the updater with command line arguments.");
+                Environment.Exit(1);
+            }
+
+            Update(executable, arguments);
         }
 
-        private async void Update(List<Download> downloads)
+        private async void Update(string executable, List<Download> downloads)
         {
-            string startFile = null;
-
             // Download new files
             foreach (Download download in downloads)
             {
                 await DownloadFile(download.url, download.file);
-                startFile = download.file;
             }
 
-            // Open updated program
-            // The last file to be downloaded will be executed
-            try
-            {
-                Process.Start(startFile);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message);
-            }
+            ConsoleBox.AppendText("Update complete!\n");
+            MessageBox.Show("Update complete!");
 
-            // Close updater
+            // Open updated program.
+            // The last executable file to be downloaded will be executed.
+
+            if (executable != null && executable.Length > 1 && executable.Contains(".exe"))
+            {
+                try
+                {
+                    Process.Start(executable);
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message);
+                }
+            }
+            
+            // Close updater.
             Close();
         }
 
@@ -93,21 +106,22 @@ namespace Updater
                 webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(Completed);
                 webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressBar_ValueChanged);
 
-                // Delete files to update
+                // Delete files to update.
                 if (File.Exists(fileName))
                 {
                     File.Delete(fileName);
                 }
 
-                // The variable that will be holding the url address (making sure it starts with http://)
+                // The variable that will be holding the url address (making sure it starts with http://).
                 Uri URL = new Uri(urlAddress);
 
-                // Start the stopwatch which we will be using to calculate the download speed
+                // Start the stopwatch which will be used to calculate the download speed.
                 sw.Start();
+                ConsoleBox.AppendText("Downloading '" + fileName + "' . . .\n");
 
                 try
                 {
-                    // Start downloading the file
+                    // Start downloading the file.
                     await webClient.DownloadFileTaskAsync(URL, AppDomain.CurrentDomain.BaseDirectory + fileName );
                 }
                 catch (Exception ex)
@@ -128,13 +142,11 @@ namespace Updater
             // Show the percentage on our label.
             labelPerc.Content = e.ProgressPercentage.ToString() + "%";
 
-            // Update the label with how much data have been downloaded so far and the total size of the file we are currently downloading
-            labelDownloaded.Content = string.Format("{0} MBs / {1} MBs",
-                (e.BytesReceived / 1024d / 1024d).ToString("0.00"),
-                (e.TotalBytesToReceive / 1024d / 1024d).ToString("0.00"));
+            // Update the label with how much data has been downloaded so far and the total size of the file we are currently downloading.
+            labelDownloaded.Content = string.Format("{0} MBs / {1} MBs", (e.BytesReceived / 1024d / 1024d).ToString("0.00"), (e.TotalBytesToReceive / 1024d / 1024d).ToString("0.00"));
         }
 
-        // The event that will trigger when the WebClient is completed
+        // The event that will trigger when the WebClient is completed.
         private void Completed(object sender, AsyncCompletedEventArgs e)
         {
             // Reset the stopwatch.
@@ -142,11 +154,8 @@ namespace Updater
 
             if (e.Cancelled == true)
             {
+                ConsoleBox.AppendText("Download has been cancelled.\n");
                 MessageBox.Show("Download has been canceled.");
-            }
-            else
-            {
-                MessageBox.Show("Download complete!");
             }
         }
     }

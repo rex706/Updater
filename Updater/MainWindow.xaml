@@ -5,12 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Updater"
         mc:Ignorable="d"
-        Title="Updater" Height="145" Width="346" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen">
+        Title="Updater" Height="250" Width="346" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" Background="#FF333638" Icon="unnamed.ico" Topmost="True">
     <Grid>
-        <ProgressBar x:Name="progressBar" HorizontalAlignment="Left" Height="23" Margin="9,41,0,0" VerticalAlignment="Top" Width="310"/>
-        <Label x:Name="labelSpeed" Content="0 kb/s" HorizontalAlignment="Left" Margin="56,72,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Center" Width="93"/>
-        <Label x:Name="labelPerc" Content="" HorizontalAlignment="Left" Margin="9,39,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Center" Width="310"/>
-        <Label x:Name="labelDownloaded" Content="0 b" HorizontalAlignment="Left" Margin="154,72,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Center" Width="133"/>
-        <Label x:Name="UpdateMessageLabel" Content="Downloading Update" HorizontalAlignment="Left" Margin="94,10,0,0" VerticalAlignment="Top" Height="27" Width="139" HorizontalContentAlignment="Center"/>
+        <ProgressBar x:Name="progressBar" Height="23" Margin="10,10,10,0" VerticalAlignment="Top"/>
+        <Label x:Name="labelSpeed" Content="0 kb/s" HorizontalAlignment="Center" Margin="10,38,174,159" HorizontalContentAlignment="Center" Width="156" Foreground="White" Height="24" VerticalAlignment="Center"/>
+        <Label x:Name="labelPerc" Content="" Margin="10,10,10,0" VerticalAlignment="Top" HorizontalContentAlignment="Center" Height="23" />
+        <Label x:Name="labelDownloaded" Content="0 b" HorizontalAlignment="Center" Margin="171,38,10,159" HorizontalContentAlignment="Center" Width="159" Foreground="White" Height="24" VerticalAlignment="Center"/>
+        <TextBox x:Name="ConsoleBox" IsReadOnly="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" Background="#FF191919" Foreground="#FFF1F1F1" Height="144" Margin="10,0,10,10" Text="" VerticalAlignment="Bottom"/>
     </Grid>
 </Window>
