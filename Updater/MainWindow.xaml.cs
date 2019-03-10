@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -30,43 +32,86 @@ namespace Updater
         {
             InitializeComponent();
 
-            this.Loaded += MainWindow_Loaded;
+            this.Loaded += MainWindow_LoadedAsync;
         }
 
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        private async void MainWindow_LoadedAsync(object sender, RoutedEventArgs e)
         {
             string[] args = Environment.GetCommandLineArgs();
             List<Download> arguments = new List<Download>();
 
-            if (args.Length < 4)
+            // There is always one argument by default 
+            // and there is only one additional argument expected.
+            if (args.Length < 2)
             {
-                MessageBox.Show("No arguments found. Please run the updater with command line arguments.");
-                Environment.Exit(1);
+                MessageBox.Show("No arguments found. Please provide update manifest.");
+                Close();
             }
 
-            string executable = args[1];
+            string manifestUrl = args[1];
 
-            // Get file download info from command line args.
-            for (int i = 2; i < args.Length; i += 2)
+            ConsoleBox.AppendText("Reading update manifest . . .\n");
+
+            // Open the text file using a stream reader.
+            using (Stream stream = await new HttpClient().GetStreamAsync(manifestUrl))
             {
-                // If a new version of the updater is being acquired, rename it to be handled in UpdateCheck.cs
-                if (args[i + 1] == "Updater.exe")
+                StreamReader reader = new StreamReader(stream);
+
+                // Initialize variables.
+                Version latest = null;
+                string executable = null;
+
+                try
                 {
-                    arguments.Add(new Download { url = args[i], file = "Updater_new.exe" });
+                    // First two expected items in manifest will be the new version and the starting executable.
+                    latest = Version.Parse(await reader.ReadLineAsync());
+                    executable = await reader.ReadLineAsync();
                 }
-                else
-                { 
-                    arguments.Add(new Download { url = args[i], file = args[i + 1] });
+                catch (Exception m)
+                {
+                    MessageBox.Show("Error parsing new version number or launch executable.");
+                    Close();
                 }
-            }
-            
-            if (arguments.Count == 0)
-            {
-                MessageBox.Show("No arguments found. Please run the updater with command line arguments.");
-                Environment.Exit(1);
-            }
 
-            Update(executable, arguments);
+                // Load manifest urls and file names.
+                while (!reader.EndOfStream)
+                {
+                    try
+                    {
+                        // Expected in pairs of two.
+                        string downloadUrl = await reader.ReadLineAsync();
+                        string downloadFile = await reader.ReadLineAsync();
+                        
+                        if (downloadUrl == null || downloadFile == null)
+                        {
+                            MessageBox.Show("Uneven update manifest.\nPlease review format.");
+                            Close();
+                        }
+
+                        // If a new version of the updater is being acquired, rename it to be handled in UpdateCheck.cs
+                        if (downloadFile == "Updater.exe")
+                        {
+                            arguments.Add(new Download { url = downloadUrl, file = "Updater_new.exe" });
+                        }
+                        else
+                        {
+                            arguments.Add(new Download { url = downloadUrl, file = downloadFile });
+                        }
+                    }
+                    catch (Exception m)
+                    {
+                        MessageBox.Show("Uneven update manifest.\nPlease review format.");
+                        Close();
+                    }
+                }
+                if (arguments.Count == 0)
+                {
+                    MessageBox.Show("No download arguments found in manifest.");
+                    Close();
+                }
+
+                Update(executable, arguments);
+            }
         }
 
         private async void Update(string executable, List<Download> downloads)
@@ -80,11 +125,11 @@ namespace Updater
             ConsoleBox.AppendText("Update complete!\n");
             MessageBox.Show("Update complete!");
 
-            // Open updated program.
-            // The last executable file to be downloaded will be executed.
-
+            // First argument is the program to be opened when the update is complete.
             if (executable != null && executable.Length > 1 && executable.Contains(".exe"))
             {
+                ConsoleBox.AppendText("Attempting to start" + executable + " . . .\n");
+
                 try
                 {
                     Process.Start(executable);
