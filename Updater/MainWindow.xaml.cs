@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -31,7 +30,7 @@ namespace Updater
         public MainWindow()
         {
             InitializeComponent();
-
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             this.Loaded += MainWindow_LoadedAsync;
         }
 
