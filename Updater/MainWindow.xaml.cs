@@ -30,6 +30,7 @@ namespace Updater
         public MainWindow()
         {
             InitializeComponent();
+            ServicePointManager.Expect100Continue = true;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             this.Loaded += MainWindow_LoadedAsync;
         }
