@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -32,7 +31,7 @@ namespace Updater
             InitializeComponent();
             ServicePointManager.Expect100Continue = true;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            this.Loaded += MainWindow_LoadedAsync;
+            Loaded += MainWindow_LoadedAsync;
         }
 
         private async void MainWindow_LoadedAsync(object sender, RoutedEventArgs e)
@@ -53,64 +52,68 @@ namespace Updater
             ConsoleBox.AppendText("Reading update manifest . . .\n");
 
             // Open the text file using a stream reader.
-            using (Stream stream = await new HttpClient().GetStreamAsync(manifestUrl))
+            using (WebClient client = new WebClient())
             {
-                StreamReader reader = new StreamReader(stream);
-
-                // Initialize variables.
-                Version latest = null;
-                string executable = null;
-
-                try
+                // Open the text file using a stream reader.
+                using (Stream stream = await client.OpenReadTaskAsync(manifestUrl))
                 {
-                    // First two expected items in manifest will be the new version and the starting executable.
-                    latest = Version.Parse(await reader.ReadLineAsync());
-                    executable = await reader.ReadLineAsync();
-                }
-                catch (Exception m)
-                {
-                    MessageBox.Show("Error parsing new version number or launch executable.");
-                    Close();
-                }
+                    StreamReader reader = new StreamReader(stream);
 
-                // Load manifest urls and file names.
-                while (!reader.EndOfStream)
-                {
+                    // Initialize variables.
+                    Version latest = null;
+                    string executable = null;
+
                     try
                     {
-                        // Expected in pairs of two.
-                        string downloadUrl = await reader.ReadLineAsync();
-                        string downloadFile = await reader.ReadLineAsync();
-                        
-                        if (downloadUrl == null || downloadFile == null)
+                        // First two expected items in manifest will be the new version and the starting executable.
+                        latest = Version.Parse(await reader.ReadLineAsync());
+                        executable = await reader.ReadLineAsync();
+                    }
+                    catch (Exception m)
+                    {
+                        MessageBox.Show("Error parsing new version number or launch executable.");
+                        Close();
+                    }
+
+                    // Load manifest urls and file names.
+                    while (!reader.EndOfStream)
+                    {
+                        try
+                        {
+                            // Expected in pairs of two.
+                            string downloadUrl = await reader.ReadLineAsync();
+                            string downloadFile = await reader.ReadLineAsync();
+
+                            if (downloadUrl == null || downloadFile == null)
+                            {
+                                MessageBox.Show("Uneven update manifest.\nPlease review format.");
+                                Close();
+                            }
+
+                            // If a new version of the updater is being acquired, rename it to be handled in UpdateCheck.cs
+                            if (downloadFile == "Updater.exe")
+                            {
+                                arguments.Add(new Download { url = downloadUrl, file = "Updater_new.exe" });
+                            }
+                            else
+                            {
+                                arguments.Add(new Download { url = downloadUrl, file = downloadFile });
+                            }
+                        }
+                        catch (Exception m)
                         {
                             MessageBox.Show("Uneven update manifest.\nPlease review format.");
                             Close();
                         }
-
-                        // If a new version of the updater is being acquired, rename it to be handled in UpdateCheck.cs
-                        if (downloadFile == "Updater.exe")
-                        {
-                            arguments.Add(new Download { url = downloadUrl, file = "Updater_new.exe" });
-                        }
-                        else
-                        {
-                            arguments.Add(new Download { url = downloadUrl, file = downloadFile });
-                        }
                     }
-                    catch (Exception m)
+                    if (arguments.Count == 0)
                     {
-                        MessageBox.Show("Uneven update manifest.\nPlease review format.");
+                        MessageBox.Show("No download arguments found in manifest.");
                         Close();
                     }
-                }
-                if (arguments.Count == 0)
-                {
-                    MessageBox.Show("No download arguments found in manifest.");
-                    Close();
-                }
 
-                Update(executable, arguments);
+                    Update(executable, arguments);
+                }
             }
         }
 
