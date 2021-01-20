@@ -5,7 +5,7 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Updater")]
+[assembly: AssemblyTitle("Simple file updater to be used for other applications.")]
 [assembly: AssemblyDescription("Simple file updater to be used for other applications.")]
 [assembly: AssemblyConfiguration("release")]
 [assembly: AssemblyCompany("rex706 Industries")]
