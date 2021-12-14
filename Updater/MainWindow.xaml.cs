@@ -31,6 +31,7 @@ namespace Updater
             InitializeComponent();
             ServicePointManager.Expect100Continue = true;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
             Loaded += MainWindow_LoadedAsync;
         }
 
@@ -66,7 +67,8 @@ namespace Updater
                     try
                     {
                         // First two expected items in manifest will be the new version and the starting executable.
-                        latest = Version.Parse(await reader.ReadLineAsync());
+                        string v = await reader.ReadLineAsync();
+                        latest = Version.Parse(v);
                         executable = await reader.ReadLineAsync();
                     }
                     catch (Exception m)
