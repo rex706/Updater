@@ -46,7 +46,7 @@ namespace Updater
 
             foreach(string arg in args)
             {
-                if (Uri.TryCreate(arg, UriKind.RelativeOrAbsolute, out _))
+                if (Uri.TryCreate(arg, UriKind.Absolute, out _) && !File.Exists(arg))
                 {
                     manifestUrl = arg;
                     break;
@@ -85,7 +85,7 @@ namespace Updater
                     }
                     catch (Exception m)
                     {
-                        MessageBox.Show("Error parsing new version number or launch executable.");
+                        MessageBox.Show("Error parsing new version number or launch executable.\n\n" + m.Message + "\n\nManifest: " + manifestUrl);
                         Close();
                         return;
                     }
@@ -144,7 +144,7 @@ namespace Updater
             }
 
             ConsoleBox.AppendText("Update complete!\n");
-            MessageBox.Show("Update complete!");
+            //MessageBox.Show("Update complete!");
 
             // First argument is the program to be opened when the update is complete.
             if (executable != null && executable.Length > 1 && executable.Contains(".exe"))
