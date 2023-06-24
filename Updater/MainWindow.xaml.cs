@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -37,6 +38,8 @@ namespace Updater
 
         private async void MainWindow_LoadedAsync(object sender, RoutedEventArgs e)
         {
+            Title = "Updater " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
             string[] args = Environment.GetCommandLineArgs();
             List<Download> arguments = new List<Download>();
 
@@ -46,6 +49,7 @@ namespace Updater
             {
                 MessageBox.Show("No arguments found. Please provide update manifest.");
                 Close();
+                return;
             }
 
             string manifestUrl = args[1];
@@ -75,6 +79,7 @@ namespace Updater
                     {
                         MessageBox.Show("Error parsing new version number or launch executable.");
                         Close();
+                        return;
                     }
 
                     // Load manifest urls and file names.
@@ -90,6 +95,7 @@ namespace Updater
                             {
                                 MessageBox.Show("Uneven update manifest.\nPlease review format.");
                                 Close();
+                                return;
                             }
 
                             // If a new version of the updater is being acquired, rename it to be handled in UpdateCheck.cs
@@ -106,12 +112,14 @@ namespace Updater
                         {
                             MessageBox.Show("Uneven update manifest.\nPlease review format.");
                             Close();
+                            return;
                         }
                     }
                     if (arguments.Count == 0)
                     {
                         MessageBox.Show("No download arguments found in manifest.");
                         Close();
+                        return;
                     }
 
                     Update(executable, arguments);
@@ -154,12 +162,14 @@ namespace Updater
             using (webClient = new WebClient())
             {
                 webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(Completed);
-                webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressBar_ValueChanged);
+                webClient.DownloadProgressChanged += WebClient_DownloadProgressChanged;
+
+                string path = AppDomain.CurrentDomain.BaseDirectory + fileName;
 
                 // Delete files to update.
-                if (File.Exists(fileName))
+                if (File.Exists(path))
                 {
-                    File.Delete(fileName);
+                    File.Delete(path);
                 }
 
                 // The variable that will be holding the url address (making sure it starts with http://).
@@ -172,7 +182,7 @@ namespace Updater
                 try
                 {
                     // Start downloading the file.
-                    await webClient.DownloadFileTaskAsync(URL, AppDomain.CurrentDomain.BaseDirectory + fileName );
+                    await webClient.DownloadFileTaskAsync(URL, path);
                 }
                 catch (Exception ex)
                 {
@@ -181,19 +191,27 @@ namespace Updater
             }
         }
 
+        private void WebClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+            ProgressBar_ValueChanged(sender, e);
+        }
+
         private void ProgressBar_ValueChanged(object sender, DownloadProgressChangedEventArgs e)
         {
-            // Calculate download speed and output it to labelSpeed.
-            labelSpeed.Content = string.Format("{0} kb/s", (e.BytesReceived / 1024d / sw.Elapsed.TotalSeconds).ToString("0.00"));
+            Dispatcher.Invoke(() =>
+            {
+                // Calculate download speed and output it to labelSpeed.
+                labelSpeed.Content = string.Format("{0} kb/s", (e.BytesReceived / 1024d / sw.Elapsed.TotalSeconds).ToString("0.00"));
 
-            // Update the progressbar percentage only when the value is not the same.
-            progressBar.Value = e.ProgressPercentage;
+                // Update the progressbar percentage only when the value is not the same.
+                progressBar.Value = e.ProgressPercentage;
 
-            // Show the percentage on our label.
-            labelPerc.Content = e.ProgressPercentage.ToString() + "%";
+                // Show the percentage on our label.
+                labelPerc.Content = e.ProgressPercentage.ToString() + "%";
 
-            // Update the label with how much data has been downloaded so far and the total size of the file we are currently downloading.
-            labelDownloaded.Content = string.Format("{0} MBs / {1} MBs", (e.BytesReceived / 1024d / 1024d).ToString("0.00"), (e.TotalBytesToReceive / 1024d / 1024d).ToString("0.00"));
+                // Update the label with how much data has been downloaded so far and the total size of the file we are currently downloading.
+                labelDownloaded.Content = string.Format("{0} MBs / {1} MBs", (e.BytesReceived / 1024d / 1024d).ToString("0.00"), (e.TotalBytesToReceive / 1024d / 1024d).ToString("0.00"));
+            });
         }
 
         // The event that will trigger when the WebClient is completed.
