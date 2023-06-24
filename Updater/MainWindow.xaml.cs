@@ -41,20 +41,28 @@ namespace Updater
             Title = "Updater " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             string[] args = Environment.GetCommandLineArgs();
-            List<Download> arguments = new List<Download>();
 
-            // There is always one argument by default 
-            // and there is only one additional argument expected.
-            if (args.Length < 2)
+            string manifestUrl = null;
+
+            foreach(string arg in args)
             {
-                MessageBox.Show("No arguments found. Please provide update manifest.");
+                if (Uri.TryCreate(arg, UriKind.RelativeOrAbsolute, out _))
+                {
+                    manifestUrl = arg;
+                    break;
+                }
+            }
+
+            if (manifestUrl == null)
+            {
+                MessageBox.Show("No valid argument found.\nPlease provide update manifest.");
                 Close();
                 return;
             }
 
-            string manifestUrl = args[1];
-
             ConsoleBox.AppendText("Reading update manifest . . .\n");
+
+            List<Download> downloads = new List<Download>();
 
             // Open the text file using a stream reader.
             using (WebClient client = new WebClient())
@@ -101,11 +109,11 @@ namespace Updater
                             // If a new version of the updater is being acquired, rename it to be handled in UpdateCheck.cs
                             if (downloadFile == "Updater.exe")
                             {
-                                arguments.Add(new Download { url = downloadUrl, file = "Updater_new.exe" });
+                                downloads.Add(new Download { url = downloadUrl, file = "Updater_new.exe" });
                             }
                             else
                             {
-                                arguments.Add(new Download { url = downloadUrl, file = downloadFile });
+                                downloads.Add(new Download { url = downloadUrl, file = downloadFile });
                             }
                         }
                         catch (Exception m)
@@ -115,14 +123,14 @@ namespace Updater
                             return;
                         }
                     }
-                    if (arguments.Count == 0)
+                    if (downloads.Count == 0)
                     {
                         MessageBox.Show("No download arguments found in manifest.");
                         Close();
                         return;
                     }
 
-                    Update(executable, arguments);
+                    Update(executable, downloads);
                 }
             }
         }
