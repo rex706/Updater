@@ -5,12 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Updater"
         mc:Ignorable="d"
-        Title="Updater" Height="250" Width="346" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" Background="#FF333638" Icon="unnamed.ico" Topmost="True">
+        Title="Updater" Height="250" Width="400" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" Background="#FF333638" Icon="unnamed.ico">
     <Grid>
-        <ProgressBar x:Name="progressBar" Height="23" Margin="10,10,10,0" VerticalAlignment="Top"/>
-        <Label x:Name="labelSpeed" Content="0 kb/s" HorizontalAlignment="Center" Margin="10,38,174,159" HorizontalContentAlignment="Center" Width="156" Foreground="White" Height="24" VerticalAlignment="Center"/>
-        <Label x:Name="labelPerc" Content="" Margin="10,10,10,0" VerticalAlignment="Top" HorizontalContentAlignment="Center" Height="23" />
-        <Label x:Name="labelDownloaded" Content="0 b" HorizontalAlignment="Center" Margin="171,38,10,159" HorizontalContentAlignment="Center" Width="159" Foreground="White" Height="24" VerticalAlignment="Center"/>
-        <TextBox x:Name="ConsoleBox" IsReadOnly="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" Background="#FF191919" Foreground="#FFF1F1F1" Height="144" Margin="10,0,10,10" Text="" VerticalAlignment="Bottom"/>
+        <Grid Margin="0,0,0,117">
+            <ProgressBar x:Name="progressBar" Height="23" Margin="10,10,10,0" VerticalAlignment="Top"/>
+            <Label x:Name="labelSpeed" Content="0 kb/s" Margin="10,38,200,1" HorizontalContentAlignment="Center" Foreground="White"/>
+            <Label x:Name="labelDownloaded" Content="0 b" Margin="200,38,10,1" HorizontalContentAlignment="Center" Foreground="White"/>
+            <Label x:Name="labelPerc" Content="" Margin="10,10,10,0" VerticalAlignment="Top" HorizontalContentAlignment="Center" Height="23" />
+        </Grid>
+        <Grid Margin="0,59,0,0">
+            <TextBox x:Name="ConsoleBox" IsReadOnly="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Auto" Background="#FF191919" Foreground="#FFF1F1F1" Text="" Margin="10,10,10,10" TextChanged="ConsoleBox_TextChanged"/>
+        </Grid>
     </Grid>
 </Window>
