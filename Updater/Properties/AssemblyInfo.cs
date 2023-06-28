@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("release")]
 [assembly: AssemblyCompany("rex706 Industries")]
 [assembly: AssemblyProduct("Updater")]
-[assembly: AssemblyCopyright("Copyright ©  2021")]
+[assembly: AssemblyCopyright("Copyright ©  2023")]
 [assembly: AssemblyTrademark("soon^tm")]
 [assembly: AssemblyCulture("")]
 [assembly: Guid("2FB641E5-A4D2-4B3B-B51A-575AE3246BBB")]
@@ -50,5 +50,5 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.1.0.8")]
-[assembly: AssemblyFileVersion("1.1.0.8")]
+[assembly: AssemblyVersion("1.1.0.9")]
+[assembly: AssemblyFileVersion("1.1.0.9")]
