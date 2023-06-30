@@ -167,7 +167,6 @@ namespace Updater
             }
 
             Dispatcher.Invoke(() => { ConsoleBox.AppendText("Update complete!\n"); });
-            //MessageBox.Show("Update complete!");
 
             // First argument is the program to be opened when the update is complete.
             if (executable != null && executable.Length > 1 && executable.Contains(".exe"))
@@ -188,11 +187,10 @@ namespace Updater
                 }
             }
 
-            Dispatcher.Invoke(() => { ConsoleBox.AppendText("Closing updater . . . \n"); });
-
-            Thread.Sleep(sleep);
-
-            Dispatcher.Invoke(() => { Close(); });
+            Dispatcher.Invoke(() => { 
+                ConsoleBox.AppendText("Closing updater . . . \n");
+                Close();
+            });
         }
 
         public async Task DownloadFile(string urlAddress, string fileName)
@@ -234,10 +232,7 @@ namespace Updater
                     // Start the stopwatch which will be used to calculate the download speed.
                     sw.Start();
 
-                    Dispatcher.Invoke(() =>
-                    {
-                        ConsoleBox.AppendText("Downloading '" + fileName + "' . . .\n");
-                    });
+                    Dispatcher.Invoke(() => { ConsoleBox.AppendText("Downloading '" + fileName + "' . . .\n"); });
 
                     // Start downloading the file.
                     await webClient.DownloadFileTaskAsync(URL, path);

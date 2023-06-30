@@ -14,7 +14,7 @@
             <Label x:Name="labelPerc" Content="" Margin="10,10,10,0" VerticalAlignment="Top" HorizontalContentAlignment="Center" Height="23" />
         </Grid>
         <Grid Margin="0,59,0,0">
-            <TextBox x:Name="ConsoleBox" IsReadOnly="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Auto" Background="#FF191919" Foreground="#FFF1F1F1" Text="" Margin="10,10,10,10" TextChanged="ConsoleBox_TextChanged"/>
+            <TextBox x:Name="ConsoleBox" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Auto" Background="#FF191919" Foreground="#FFF1F1F1" Text="" Margin="10,10,10,10" TextChanged="ConsoleBox_TextChanged" FontSize="11"/>
         </Grid>
     </Grid>
 </Window>
